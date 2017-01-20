@@ -1,0 +1,52 @@
+buildscript {
+	def home=System.properties['user.home']
+	def uri = "${home}/dummyrepo/.m2"
+	repositories {
+//		jcenter()
+		maven {
+			url "https://plugins.gradle.org/m2/"
+//			artifactUrls uri
+		}
+		
+		maven {
+			name = 'dummy'
+			url = "${home}/dummyrepo/.m2"
+		}
+	}
+	
+	dependencies {
+		classpath 'com.netflix.nebula:gradle-ospackage-plugin:4.3.0'
+		classpath 'com.whatever.dummy:plugin:1.0.0'
+	}
+}
+import com.netflix.gradle.plugins.rpm.Rpm
+def home=System.properties['user.home']
+repositories {
+	maven {
+		url "https://plugins.gradle.org/m2/"
+//		artifactUrls "${home}/dummyrepo/.m2"
+	}
+	maven {
+		name = 'dummy'
+		url = "${home}/dummyrepo/.m2"
+	}
+}
+
+//apply plugin: 'nebula.rpm'
+apply plugin: 'dummy.rpm'
+defaultTasks 'rpm'
+
+
+
+project.tasks.withType(Rpm.class) {
+	into('usr/local/dummy') {
+		from "${project.projectDir}/payload"
+	}
+}
+
+allprojects { Project proj ->
+	proj.apply plugin: 'eclipse-wtp'
+	if (proj != rootProject) {
+		eclipse.project.name = (rootProject.name + proj.path).replaceAll(':', '-')
+	}
+}
